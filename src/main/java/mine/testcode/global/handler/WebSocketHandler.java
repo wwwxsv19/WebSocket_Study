@@ -1,22 +1,16 @@
 package mine.testcode.global.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import mine.testcode.domain.chat.ChatMessage;
-import mine.testcode.domain.chat.ChatRoom;
+import mine.testcode.domain.chat.presentation.dto.ChatMessageDto;
+import mine.testcode.domain.chat.presentation.ChatRoom;
 import mine.testcode.domain.chat.service.ChatService;
 import org.springframework.stereotype.Component;
-import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
@@ -26,11 +20,11 @@ public class WebSocketHandler extends TextWebSocketHandler {
     private final ChatService chatService;
 
     @Override
-    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+    protected void handleTextMessage(@NonNull WebSocketSession session, TextMessage message) throws Exception {
         String payload = message.getPayload();
-        log.info("{}", payload);
+        log.info("session : {}, payLoad : {}", session, payload);
 
-        ChatMessage chatMessage = mapper.readValue(payload, ChatMessage.class);
+        ChatMessageDto chatMessage = mapper.readValue(payload, ChatMessageDto.class);
 
         ChatRoom chatRoom = chatService.findRoomById(chatMessage.getChatRoomId());
 
