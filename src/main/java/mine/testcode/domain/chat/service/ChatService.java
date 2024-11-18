@@ -5,6 +5,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import mine.testcode.domain.chat.ChatRoom;
+import mine.testcode.domain.chat.presentation.dto.ChatDto;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -32,11 +33,11 @@ public class ChatService {
         return chatRooms.get(chatRoomId);
     }
 
-    public ChatRoom createRoom(String chatRoomName) {
+    public ChatRoom createRoom(ChatDto.CreateRequest request) {
         String randomId = UUID.randomUUID().toString();
         ChatRoom chatRoom = ChatRoom.builder()
                 .chatRoomId(randomId)
-                .chatRoomName(chatRoomName)
+                .chatRoomName(request.getUserName())
                 .build();
         chatRooms.put(randomId, chatRoom);
         return chatRoom;

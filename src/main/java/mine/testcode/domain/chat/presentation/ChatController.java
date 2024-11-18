@@ -1,8 +1,9 @@
-package mine.testcode.domain.chat.controller;
+package mine.testcode.domain.chat.presentation;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import mine.testcode.domain.chat.ChatRoom;
+import mine.testcode.domain.chat.presentation.dto.ChatDto;
 import mine.testcode.domain.chat.service.ChatService;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,8 +17,8 @@ public class ChatController {
     private final ChatService chatService;
 
     @PostMapping("/")
-    public ChatRoom createRoom(@RequestBody String name) {
-        return chatService.createRoom(name);
+    public ChatRoom createRoom(@RequestBody ChatDto.CreateRequest request) {
+        return chatService.createRoom(request);
     }
 
     @GetMapping("/")
