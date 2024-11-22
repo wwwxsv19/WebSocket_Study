@@ -9,6 +9,8 @@ spring:
     username: root
   jpa:
     hibernate:
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
       ddl-auto: update
     generate-ddl: true
   main:
