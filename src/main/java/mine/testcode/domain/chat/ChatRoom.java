@@ -29,7 +29,7 @@ public class ChatRoom {
     @JdbcTypeCode(SqlTypes.JSON)
     private Set<ChatMessage> messageSet = new HashSet<>();
 
-    @Transient
+    // @Transient
     @JdbcTypeCode(SqlTypes.JSON)
     private Set<WebSocketSession> sessions = new HashSet<>();
 
@@ -43,6 +43,7 @@ public class ChatRoom {
         if (chatMessage.getMessageType().equals(MessageType.ENTER)) {
             chatMessage.initMessage(chatMessage.getSenderId() + "님이 입장하셨습니다");
             messageSet.add(chatMessage);
+            sessions.add(session);
         }
 
         sendMessage(chatMessage, chatService);
