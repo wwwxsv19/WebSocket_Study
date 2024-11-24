@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import mine.testcode.domain.chat.ChatRoom;
 import mine.testcode.domain.chat.presentation.dto.ChatDto;
+import mine.testcode.domain.chat.repository.ChatRoomRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -17,7 +18,7 @@ import java.util.*;
 @RequiredArgsConstructor
 @Slf4j
 public class ChatService {
-    private final ObjectMapper mapper;
+    private final ChatRoomRepository chatRoomRepository;
     private Map<String, ChatRoom> chatRooms;
 
     @PostConstruct
@@ -26,11 +27,14 @@ public class ChatService {
     }
 
     public List<ChatRoom> findAllRoom() {
-        return new ArrayList<>(chatRooms.values());
+        // return new ArrayList<>(chatRooms.values());
+        return chatRoomRepository.findAll();
     }
 
     public ChatRoom findRoomById(String chatRoomId) {
-        return chatRooms.get(chatRoomId);
+        // return chatRooms.get(chatRoomId);
+        return chatRoomRepository.findById(chatRoomId)
+                .orElseThrow(() -> new RuntimeException("채팅방을 찾을 수 없습니다!"));
     }
 
     public ChatRoom createRoom(ChatDto.CreateRequest request) {
@@ -40,14 +44,7 @@ public class ChatService {
                 .chatRoomName(request.getUserName())
                 .build();
         chatRooms.put(randomId, chatRoom);
+        chatRoomRepository.save(chatRoom);
         return chatRoom;
-    }
-
-    public <T> void sendMessage(WebSocketSession session, T message) {
-        try {
-            session.sendMessage(new TextMessage(mapper.writeValueAsString(message)));
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-        }
     }
 }

@@ -1,7 +1,7 @@
 package mine.testcode.domain.chat.presentation.dto;
 
 import lombok.*;
-import mine.testcode.global.handler.types.MessageType;
+import mine.testcode.domain.chat.types.MessageType;
 
 @Getter
 public class ChatMessage {

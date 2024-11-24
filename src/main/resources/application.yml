@@ -16,9 +16,10 @@ spring:
   main:
     allow-bean-definition-overriding: true
 
-server:
-  servlet:
-    context-path: /api
+
+#server:
+  #servlet:
+    #context-path: /api
 
 jwt:
   secret: ${JWT_KEY}
