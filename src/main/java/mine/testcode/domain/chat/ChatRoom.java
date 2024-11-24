@@ -27,6 +27,10 @@ public class ChatRoom {
     @JdbcTypeCode(SqlTypes.JSON)
     private Set<ChatMessage> messageSet = new HashSet<>();
 
+    public void addMessage(ChatMessage chatMessage) {
+        messageSet.add(chatMessage);
+    }
+
     @Builder
     public ChatRoom(String chatRoomId, String chatRoomName) {
         this.chatRoomId = chatRoomId;
