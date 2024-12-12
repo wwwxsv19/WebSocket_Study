@@ -56,6 +56,8 @@ public class SecurityConfig {
                         auth -> auth
                                 .requestMatchers("/userCreate").permitAll()
 
+                                .requestMatchers("/ws").permitAll()
+
                                 .anyRequest().authenticated()
                 )
 

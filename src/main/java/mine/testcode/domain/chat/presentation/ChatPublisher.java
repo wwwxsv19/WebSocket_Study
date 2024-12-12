@@ -5,9 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import mine.testcode.domain.chat.ChatRoom;
 import mine.testcode.domain.chat.presentation.dto.ChatMessage;
 import mine.testcode.domain.chat.service.ChatService;
-import mine.testcode.domain.chat.types.MessageType;
+import mine.testcode.global.utils.JwtUtil;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
+import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Controller;
 
 @Controller
@@ -15,18 +16,36 @@ import org.springframework.stereotype.Controller;
 @Slf4j
 public class ChatPublisher {
     private final ChatService chatService;
-    private final SimpMessageSendingOperations messagingTemplate;
 
-    @MessageMapping("/Messaging")
-    public void message(ChatMessage chatMessage) {
-        log.info("Message : {}", chatMessage);
+    private final JwtUtil jwtUtil;
 
-        if (MessageType.ENTER.equals(chatMessage.getMessageType())) {
-            chatMessage.initMessage(chatMessage.getSenderId() + " 님이 채팅을 시작합니다!");
+    private final SimpMessageSendingOperations messageTemplate;
+
+    @MessageMapping("/message")
+    public void message(StompHeaderAccessor accessor, ChatMessage chatMessage) {
+        log.info("메시지 : {}", chatMessage.toString());
+
+        String header = accessor.getFirstNativeHeader("Authorization");
+        if (header == null || !header.startsWith("Bearer ")) {
+            throw new IllegalArgumentException("존재하지 않거나 잘못된 토큰입니다.");
         }
 
-        ChatRoom chatRoom = chatService.saveChatMessage(chatMessage);
+        String token = header.substring(7);
+        String userEmail = jwtUtil.getUserEmail(token);
 
-        messagingTemplate.convertAndSend("/sub/chatRoom/" + chatMessage.getChatRoomId(), chatMessage);
+        if (ChatMessage.MessageType.ENTER.equals(chatMessage.getMessageType())) {
+            log.info("채팅방 첫 개설");
+            chatMessage.initChatRoomId(chatService.createRoom(userEmail));
+        }
+
+        chatMessage.initSentAt();
+        chatService.saveChatMessage(chatMessage);
+
+        String chatRoomId = chatMessage.getChatRoomId();
+
+        log.info("메시지 전송");
+        messageTemplate.convertAndSend("/sub/" + chatRoomId, chatMessage);
+
+        log.info("메시지 전송 완료");
     }
 }

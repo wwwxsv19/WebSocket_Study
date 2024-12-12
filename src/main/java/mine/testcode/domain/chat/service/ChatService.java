@@ -1,20 +1,17 @@
 package mine.testcode.domain.chat.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.annotation.PostConstruct;
-import jakarta.persistence.Table;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import mine.testcode.domain.chat.ChatRoom;
-import mine.testcode.domain.chat.presentation.dto.ChatDto;
+import mine.testcode.domain.chat.presentation.dto.CreateDto;
 import mine.testcode.domain.chat.presentation.dto.ChatMessage;
 import mine.testcode.domain.chat.repository.ChatRoomRepository;
+import mine.testcode.domain.user.User;
+import mine.testcode.domain.user.service.UserService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.WebSocketSession;
 
-import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -22,32 +19,38 @@ import java.util.*;
 @RequiredArgsConstructor
 @Slf4j
 public class ChatService {
+    private final UserService userService;
     private final ChatRoomRepository chatRoomRepository;
 
-    public List<ChatRoom> findAllRoom() {
-        // return new ArrayList<>(chatRooms.values());
+    public List<ChatRoom> getAll() {
         return chatRoomRepository.findAll();
     }
 
+    public List<ChatRoom> getAllByUser(Long userId) {
+        return chatRoomRepository.findAllByCreateUserId(userId);
+    }
+
     public ChatRoom findRoomById(String chatRoomId) {
-        // return chatRooms.get(chatRoomId);
         return chatRoomRepository.findById(chatRoomId)
                 .orElseThrow(() -> new RuntimeException("채팅방을 찾을 수 없습니다!"));
     }
 
-    public ChatRoom createRoom(ChatDto.CreateRequest request) {
-        String randomId = UUID.randomUUID().toString();
+    public String createRoom(String userEmail) {
+        User user = userService.getUserByUserEmail(userEmail);
+
         ChatRoom chatRoom = ChatRoom.builder()
-                .chatRoomId(randomId)
-                .chatRoomName(request.getUserName())
+                .chatRoomId(UUID.randomUUID().toString())
+                .chatRoomName(user.getUserName() + " 님의 채팅방")
+                .createUserId(user.getUserId())
+                .createdAt(LocalDateTime.now())
                 .build();
         chatRoomRepository.save(chatRoom);
-        return chatRoom;
+
+        return chatRoom.getChatRoomId();
     }
 
-    public ChatRoom saveChatMessage(ChatMessage chatMessage) {
+    public void saveChatMessage(ChatMessage chatMessage) {
         ChatRoom chatRoom = this.findRoomById(chatMessage.getChatRoomId());
         chatRoom.addMessage(chatMessage);
-        return chatRoom;
     }
 }

@@ -15,6 +15,10 @@ public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
 
+    public User getUserByUserEmail(String userEmail) {
+        return userRepository.findByUserEmail(userEmail);
+    }
+
     public void saveUser(CreateDto request) {
         User user = User.builder()
                 .userName(request.getUserName())

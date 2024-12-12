@@ -3,9 +3,8 @@ package mine.testcode.domain.chat.presentation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import mine.testcode.domain.chat.ChatRoom;
-import mine.testcode.domain.chat.presentation.dto.ChatDto;
+import mine.testcode.domain.chat.presentation.dto.CreateDto;
 import mine.testcode.domain.chat.service.ChatService;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,18 +16,9 @@ import java.util.List;
 public class ChatController {
     private final ChatService chatService;
 
-    @PostMapping("/")
-    public ChatRoom createRoom(@RequestBody ChatDto.CreateRequest request) {
-        return chatService.createRoom(request);
-    }
-
+    // 모든 채팅방 불러오기
     @GetMapping("/")
     public List<ChatRoom> findAllRoom() {
-        return chatService.findAllRoom();
-    }
-
-    @GetMapping("/{chatRoomId}")
-    public ChatRoom findRoomInfo(@PathVariable String chatRoomId) {
-        return chatService.findRoomById(chatRoomId);
+        return chatService.getAll();
     }
 }
