@@ -24,46 +24,41 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        log.info("JwtAuthFilter Started");
+        log.info("JwtAuthFilter 시작");
 
         String header = request.getHeader("Authorization");
 
-        // 예외 상황의 경우, 검사 없이 지나간다
         if (header == null || !header.startsWith("Bearer ")) {
-            log.warn("Token is null or doesn't start with Bearer");
+            log.warn("존재하지 않거나 잘못된 토큰입니다.");
             filterChain.doFilter(request, response);
             return;
         }
 
-        String token = header.substring(7); // "Bearer " 이후의 토큰 부분만 가져옵니다.
-        log.info("Token : {}", token);
+        String token = header.substring(7);
 
-        // 토큰이 만료되었을 경우, 검사 없이 지나간다
         if (jwtUtil.isExpired(token)) {
-            log.warn("Expired token");
+            log.warn("유효하지 않은 토큰입니다.");
             filterChain.doFilter(request, response);
             return;
         }
 
-        // 토큰에서 사용자 정보 추출
+        log.info("토큰 : {}", token);
+
         String userEmail = jwtUtil.getUserEmail(token);
         String userRole = jwtUtil.getUserRole(token);
 
-        // 사용자 정보로 User 객체 생성
         User user = User.builder()
                 .userEmail(userEmail)
                 .userPassword("")
                 .userRole(userRole)
                 .build();
 
-        // UserDetails 객체 생성
         CustomUserDetails userDetails = new CustomUserDetails(user);
         Authentication auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 
-        // SecurityContextHolder 에 인증 정보 설정
         SecurityContextHolder.getContext().setAuthentication(auth);
 
+        log.info("JwtAuthFilter 통과");
         filterChain.doFilter(request, response);
-
     }
 }
